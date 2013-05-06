@@ -4,16 +4,16 @@
 #include <tuple>
 #include "Neuron.h"
 
-template <typename, typename>
+template <typename, typename, typename>
 class NeuronLayerImpl;
 
-template <int... Width, int... InputWidth>
-class NeuronLayerImpl<Sequence<Width...>, Sequence<InputWidth...>> {
+template <int... Width, int... InputWidth, int BiasNeuron>
+class NeuronLayerImpl<Sequence<Width...>, Sequence<InputWidth...>, Sequence<BiasNeuron>> {
 public:
-    std::tuple<decltype(Width, Neuron<Sequence<InputWidth...>>())...> neurons;
+    std::tuple<decltype(Width, Neuron<Sequence<InputWidth..., BiasNeuron>>())...> neurons;
     
     std::tuple<decltype(double(Width))...> operator()(std::tuple<decltype(double(InputWidth))...> input) {
-        return std::make_tuple(std::get<Width>(neurons)(input)...);
+        return std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1)))...);
     }
     
     template <typename TTuples, int I>
@@ -23,12 +23,12 @@ public:
     
     std::tuple<decltype(double(InputWidth))...> operator()(std::tuple<decltype(double(InputWidth))...> input, std::tuple<decltype(double(Width))...> error) {
         
-        auto data = std::make_tuple(std::get<Width>(neurons)(input, std::get<Width>(error))...);
+        auto data = std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1)), std::get<Width>(error))...);
         return std::make_tuple(sumColumn<decltype(data), InputWidth>(data)...);
     }
 };
 
 template <int Layer, int Input>
-class NeuronLayer : public NeuronLayerImpl<typename GenerateSequence<Layer>::type, typename GenerateSequence<Input>::type> {};
+class NeuronLayer : public NeuronLayerImpl<typename GenerateSequence<Layer>::type, typename GenerateSequence<Input>::type, Sequence<Input>> {};
 
 #endif
