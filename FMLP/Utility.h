@@ -2,12 +2,32 @@
 #define NEURALNETWORK_UTILITY_H
 
 #include <random>
+#include <sstream>
+
+template <typename... TTypes>
+inline void unpack(TTypes...) {
+}
+
+template <typename... TTypes, int... I>
+std::string printTuple(std::tuple<TTypes...> tuple, Sequence<I...>) {
+    std::stringstream s;
+    char chars[100];
+    
+    unpack((sprintf(chars, "%8.5f, ", std::get<I>(tuple)),(std::cout << chars),0)...);
+    
+    return s.str();
+}
+
+template <typename... TTypes>
+std::string printTuple(std::tuple<TTypes...> tuple) {
+    return printTuple(tuple, typename GenerateSequence<sizeof...(TTypes)>::type());
+}
 
 inline double getRand(int value) {
     
     std::random_device rd;
-    std::uniform_int_distribution<int> dist(0, 1000);
-    return (static_cast<double>(dist(rd)) / static_cast<double>(10000)) - 0.05;
+    std::normal_distribution<> dist(0, 0.1);
+    return dist(rd);
 }
 
 template <typename TValue>

@@ -22,6 +22,8 @@ public:
     }
     
     std::tuple<decltype(double(InputWidth))...> operator()(std::tuple<decltype(double(InputWidth))...> input, std::tuple<decltype(double(Width))...> error) {
+        //std::cout << "In: " << sizeof...(InputWidth) << " Out: " << sizeof...(Width) << std::endl;
+        //std::cout << "Error Vector: " << printTuple(error) << std::endl;
         
         auto data = std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1)), std::get<Width>(error))...);
         return std::make_tuple(sumColumn<decltype(data), InputWidth>(data)...);
