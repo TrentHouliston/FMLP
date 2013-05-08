@@ -7,7 +7,17 @@ struct HyperbolicTan {
     }
     
     static inline double dfunc(double input) {
-        return 1 - (tanh(input) * tanh(input));
+        return (1 - tanh(input)) * (1 + tanh(input));
+    }
+};
+
+struct Sigmoid {
+    static inline double func(double input) {
+        return 1 / (1 + exp(-input));
+    }
+    
+    static inline double dfunc(double input) {
+        return func(1 - func(input));
     }
 };
 

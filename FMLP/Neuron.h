@@ -5,14 +5,18 @@
 #include <tuple>
 #include "Utility.h"
 
-template <typename, typename>
+template <typename, typename, typename>
 class Neuron;
 
-template <int... Values, typename TActivation>
-class Neuron<Sequence<Values...>, TActivation> {
+template <int... Values, typename TActivation, int LearningNumerator, int LearningDenominator>
+class Neuron<Sequence<Values...>, TActivation, std::ratio<LearningNumerator, LearningDenominator>> {
 private:
     std::tuple<decltype(double(Values))...> weights = std::make_tuple(getRand(Values)...);
     std::tuple<decltype(double(Values))...> deltas = std::make_tuple(static_cast<double>(Values - Values)...);
+    
+    constexpr double learningRate(int numerator, int denominator) {
+        return static_cast<double>(numerator) / static_cast<double>(denominator);
+    }
     
 public:
 
@@ -26,7 +30,7 @@ public:
         const double derivitive = TActivation::dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...));
         const double error = derivitive * childError;
         const auto ret = std::make_tuple((error * std::get<Values>(weights))...);
-        const auto delta = std::make_tuple((error * std::get<Values>(input) * 0.05)...);
+        const auto delta = std::make_tuple((error * std::get<Values>(input) * learningRate(LearningNumerator, LearningDenominator))...);
         
         /*std::cout << "\tNeuron " << this << std::endl;
         std::cout << "\t\tChild Error:  " << printTuple(std::make_tuple(childError)) << std::endl;

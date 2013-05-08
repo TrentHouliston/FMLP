@@ -45,7 +45,6 @@ struct Learn {
     template <typename... TTypes, typename... TInputs, typename... TTarget>
     static inline auto call(std::tuple<TTypes...>& layers, const std::tuple<TInputs...>& input, const std::tuple<TTarget...>& target)
     -> decltype(std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), target))) {
-        
         return std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), target));
     }
 };
@@ -55,7 +54,7 @@ struct Learn<1, Length> {
     
     template <typename... TTypes, int... I>
     static inline std::tuple<decltype(double(I))...> error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target, Sequence<I...>) {
-        return std::make_tuple((std::get<I>(target) - std::get<I>(actual))...);
+        return std::make_tuple((std::get<I>(actual) - std::get<I>(target))...);
     }
     
     template <typename... TTypes>
