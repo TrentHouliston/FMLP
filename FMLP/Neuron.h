@@ -5,35 +5,30 @@
 #include <tuple>
 #include "Utility.h"
 
-template <typename>
+template <typename, typename>
 class Neuron;
 
-template <int... Values>
-class Neuron<Sequence<Values...>> {
-public:
-    
-    inline double func(double input) {
-        return std::tanh(input);
-    }
-    
-    inline double dfunc(double input) {
-        return 1 - (tanh(input) * tanh(input));
-    }
-    
+template <int... Values, typename TActivation>
+class Neuron<Sequence<Values...>, TActivation> {
+private:
     std::tuple<decltype(double(Values))...> weights = std::make_tuple(getRand(Values)...);
+    std::tuple<decltype(double(Values))...> deltas = std::make_tuple(static_cast<double>(Values - Values)...);
+    
+public:
+
     
     double operator()(std::tuple<decltype(double(Values))...> input) {
-        return func(sum((std::get<Values>(weights) * std::get<Values>(input))...));
+        return TActivation::func(sum((std::get<Values>(weights) * std::get<Values>(input))...));
     }
     
-    std::tuple<decltype(double(Values))...> operator()(std::tuple<decltype(double(Values))...> input, double childError) {
+    std::tuple<decltype(double(Values))...> operator()(const std::tuple<decltype(double(Values))...>& input, const double childError) {
         
-        double derivitive = dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...));
-        double error = derivitive * childError;
-        auto ret = std::make_tuple((error * std::get<Values>(weights))...);
-        auto delta = std::make_tuple((error * std::get<Values>(input) * 0.15)...);
+        const double derivitive = TActivation::dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...));
+        const double error = derivitive * childError;
+        const auto ret = std::make_tuple((error * std::get<Values>(weights))...);
+        const auto delta = std::make_tuple((error * std::get<Values>(input) * 0.05)...);
         
-        /*std::cout << "\tNeuron" << std::endl;
+        /*std::cout << "\tNeuron " << this << std::endl;
         std::cout << "\t\tChild Error:  " << printTuple(std::make_tuple(childError)) << std::endl;
         std::cout << "\t\tInputs:       " << printTuple(input) << std::endl;
         std::cout << "\t\tWeights:      " << printTuple(weights) << std::endl;
@@ -42,15 +37,22 @@ public:
         std::cout << "\t\tPush Back:    " << printTuple(ret) << std::endl;
         std::cout << "\t\tDelta:        " << printTuple(delta) << std::endl;*/
         
-        unpack((std::get<Values>(weights) -= std::get<Values>(delta))...);
+        unpack((std::get<Values>(deltas) -= std::get<Values>(delta))...);
         
-        //std::cout << "\t\tAdjusted:     " << printTuple(weights) << std::endl;
-        
-        // Unpack the calls to adjust our weights
-        
-        //std::cout << std::endl;
+        //std::cout << "\t\tDeltas:       " << printTuple(deltas) << std::endl << std::endl;
         
         return ret;
+    }
+    
+    bool applyLearning() {
+        /*std::cout << "Applying Learning" << std::endl;
+        std::cout << "\tOriginal: " << printTuple(weights) << std::endl;
+        std::cout << "\tDeltas:   " << printTuple(deltas) << std::endl;*/
+        unpack((std::get<Values>(weights) += std::get<Values>(deltas))...);
+        //std::cout << "\tNew:      " << printTuple(weights) << std::endl;
+        //std::cout << std::endl;
+        unpack((std::get<Values>(deltas) = 0)...);
+        return true;
     }
     
     // Learning

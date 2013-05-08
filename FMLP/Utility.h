@@ -26,7 +26,8 @@ std::string printTuple(std::tuple<TTypes...> tuple) {
 inline double getRand(int value) {
     
     std::random_device rd;
-    std::normal_distribution<> dist(0, 0.1);
+    std::uniform_real_distribution<> dist(-0.5, 0.5);
+    //std::normal_distribution<> dist(0, 0.25);
     return dist(rd);
 }
 

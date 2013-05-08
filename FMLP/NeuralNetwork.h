@@ -9,7 +9,7 @@
 template <int I, int Length = I>
 struct Classify {
     template <typename... TTypes, typename... TInputs>
-    static inline auto call(std::tuple<TTypes...> layers, std::tuple<TInputs...> input)
+    static inline auto call(std::tuple<TTypes...>& layers, const std::tuple<TInputs...>& input)
     -> decltype(Classify<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input))) {
         return Classify<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input));
     }
@@ -18,18 +18,35 @@ struct Classify {
 template <int Length>
 struct Classify<1, Length> {
     template <typename... TTypes, typename... TInputs>
-    static inline auto call(std::tuple<TTypes...> layers, std::tuple<TInputs...> input) -> decltype(std::get<Length - 1>(layers)(input)) {
+    static inline auto call(std::tuple<TTypes...>& layers, const std::tuple<TInputs...>& input) -> decltype(std::get<Length - 1>(layers)(input)) {
         return std::get<Length - 1>(layers)(input);
     }
 };
 
 template <int I, int Length = I>
+struct ApplyLearning {
+    template <typename... TTypes, typename... TInputs>
+    static inline void call(std::tuple<TTypes...>& layers) {
+        std::get<Length - I>(layers).applyLearning();
+        ApplyLearning<I - 1, Length>::call(layers);
+    }
+};
+
+template <int Length>
+struct ApplyLearning<1, Length> {
+    template <typename... TTypes, typename... TInputs>
+    static inline void call(std::tuple<TTypes...>& layers) {
+        std::get<Length - 1>(layers).applyLearning();
+    }
+};
+
+template <int I, int Length = I>
 struct Learn {    
-    template <typename... TTypes, typename... TInputs, typename... TExpected>
-    static inline auto call(std::tuple<TTypes...> layers, std::tuple<TInputs...> input, std::tuple<TExpected...> expected)
-    -> decltype(std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), expected))) {
+    template <typename... TTypes, typename... TInputs, typename... TTarget>
+    static inline auto call(std::tuple<TTypes...>& layers, const std::tuple<TInputs...>& input, const std::tuple<TTarget...>& target)
+    -> decltype(std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), target))) {
         
-        return std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), expected));
+        return std::get<Length - I>(layers)(input, Learn<I - 1, Length>::call(layers, std::get<Length - I>(layers)(input), target));
     }
 };
 
@@ -37,20 +54,20 @@ template <int Length>
 struct Learn<1, Length> {
     
     template <typename... TTypes, int... I>
-    static inline std::tuple<decltype(double(I))...> error(std::tuple<TTypes...> actual, std::tuple<TTypes...> expected, Sequence<I...>) {
-        return std::make_tuple((std::get<I>(actual) - std::get<I>(expected))...);
+    static inline std::tuple<decltype(double(I))...> error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target, Sequence<I...>) {
+        return std::make_tuple((std::get<I>(target) - std::get<I>(actual))...);
     }
     
     template <typename... TTypes>
-    static inline auto error(std::tuple<TTypes...> actual, std::tuple<TTypes...> expected)
-    -> decltype(error(actual, expected, typename GenerateSequence<sizeof...(TTypes)>::type())) {
-        return error(actual, expected, typename GenerateSequence<sizeof...(TTypes)>::type());
+    static inline auto error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target)
+    -> decltype(error(actual, target, typename GenerateSequence<sizeof...(TTypes)>::type())) {
+        return error(actual, target, typename GenerateSequence<sizeof...(TTypes)>::type());
     }
     
-    template <typename... TTypes, typename... TInputs, typename... TExpected>
-    static inline auto call(std::tuple<TTypes...> layers, std::tuple<TInputs...> input, std::tuple<TExpected...> expected)
-    -> decltype(std::get<Length - 1>(layers)(input, error(std::get<Length - 1>(layers)(input), expected))){
-        return std::get<Length - 1>(layers)(input, error(std::get<Length - 1>(layers)(input), expected));
+    template <typename... TTypes, typename... TInputs, typename... TTarget>
+    static inline auto call(std::tuple<TTypes...>& layers, const std::tuple<TInputs...>& input, const std::tuple<TTarget...>& target)
+    -> decltype(std::get<Length - 1>(layers)(input, error(std::get<Length - 1>(layers)(input), target))){
+        return std::get<Length - 1>(layers)(input, error(std::get<Length - 1>(layers)(input), target));
     }
 };
 
@@ -64,12 +81,16 @@ public:
     // This builds all of our neuron layers except our first layer (which is simply an input so does not need one)
     std::tuple<NeuronLayer<Layers, LayerInputs>...> layers;
     
-    std::tuple<decltype(double(Output))...> classify(std::tuple<decltype(double(Input))...> input) {
+    std::tuple<decltype(double(Output))...> classify(const std::tuple<decltype(double(Input))...>& input) {
         return Classify<sizeof...(Layers)>::call(layers, input);
     }
     
-    void learn(std::tuple<decltype(double(Input))...> input, std::tuple<decltype(double(Output))...> expected) {
-        Learn<sizeof...(Layers)>::call(layers, input, expected);
+    void learn(const std::tuple<decltype(double(Input))...>& input, const std::tuple<decltype(double(Output))...>& target) {
+        Learn<sizeof...(Layers)>::call(layers, input, target);
+    }
+    
+    void applyLearning() {
+        ApplyLearning<sizeof...(Layers)>::call(layers);
     }
 };
 
