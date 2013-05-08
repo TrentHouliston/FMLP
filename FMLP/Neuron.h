@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <tuple>
-#include <random>
 #include "Utility.h"
 
 template <typename>
@@ -21,15 +20,7 @@ public:
         return 1 - (tanh(input) * tanh(input));
     }
     
-    inline double getRand(int value) {
-        
-        std::random_device rd;
-        std::uniform_int_distribution<int> dist(0, 1000);
-        return (static_cast<double>(dist(rd)) / static_cast<double>(10000)) - 0.05;
-    }
-    
-    std::tuple<decltype(double(Values))...> weights =
-    std::make_tuple(getRand(Values)...);
+    std::tuple<decltype(double(Values))...> weights = std::make_tuple(getRand(Values)...);
     
     double operator()(std::tuple<decltype(double(Values))...> input) {
         return func(sum((std::get<Values>(weights) * std::get<Values>(input))...));
@@ -49,8 +40,6 @@ public:
     
     // Learning
     
-    // Calculate the derivitive function (tanh2(a dot b) - 1)
-    
     // Calculate my error for this layer and push it up
     //    // Error is calculated as (derivitive * child error * weights)...)
     
@@ -60,10 +49,9 @@ public:
     //    // Our delta is calculated as for each weight, derivative * myerror * parent[i] * learning rate
     
     // TODO last layer doesn't do a tanh
+    //    // Implement this along with picking the functions, setup so that the final function is an empty function
     
-    // TODO every single layer takes an additional value of 1 as a constant (so each vector is one bigger with a 1)
-    
-    // TODO implement momentum (keeping some of our delta
+    // TODO implement momentum (keeping some of our delta)
     
     // TODO if possible make the function and derivitive function it uses editable
     
