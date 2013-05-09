@@ -28,33 +28,32 @@ public:
     std::tuple<decltype(double(Values))...> operator()(const std::tuple<decltype(double(Values))...>& input, const double childError) {
         
         const double derivitive = TActivation::dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...));
-        const double error = derivitive * childError;
-        const auto ret = std::make_tuple((error * std::get<Values>(weights))...);
-        const auto delta = std::make_tuple((error * std::get<Values>(input) * fraction(LearningNumerator, LearningDenominator))...);
+        const auto ret = std::make_tuple((childError * std::get<Values>(weights))...);
+        const auto delta = std::make_tuple((childError * derivitive * std::get<Values>(input) * fraction(LearningNumerator, LearningDenominator))...);
         
-        std::cout << "\tNeuron " << this << std::endl;
+        /*std::cout << "\tNeuron " << this << std::endl;
         std::cout << "\t\tChild Error:  " << printTuple(std::make_tuple(childError)) << std::endl;
         std::cout << "\t\tInputs:       " << printTuple(input) << std::endl;
         std::cout << "\t\tWeights:      " << printTuple(weights) << std::endl;
         std::cout << "\t\tDot Product:  " << printTuple(std::make_tuple(sum((std::get<Values>(weights) * std::get<Values>(input))...))) << std::endl;
         std::cout << "\t\tDerivitive:   " << printTuple(std::make_tuple(TActivation::dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...)))) << std::endl;
         std::cout << "\t\tPush Back:    " << printTuple(ret) << std::endl;
-        std::cout << "\t\tDelta:        " << printTuple(delta) << std::endl;
+        std::cout << "\t\tDelta:        " << printTuple(delta) << std::endl;*/
         
         unpack((std::get<Values>(deltas) -= std::get<Values>(delta))...);
         
-        std::cout << "\t\tDeltas:       " << printTuple(deltas) << std::endl << std::endl;
+        //std::cout << "\t\tDeltas:       " << printTuple(deltas) << std::endl << std::endl;
         
         return ret;
     }
     
     bool applyLearning() {
-        std::cout << "Applying Learning" << std::endl;
-        std::cout << "\tOriginal: " << printTuple(weights) << std::endl;
-        std::cout << "\tDeltas:   " << printTuple(deltas) << std::endl;
+        //std::cout << "Applying Learning" << std::endl;
+        //std::cout << "\tOriginal: " << printTuple(weights) << std::endl;
+       // std::cout << "\tDeltas:   " << printTuple(deltas) << std::endl;
         unpack((std::get<Values>(weights) += std::get<Values>(deltas))...);
-        std::cout << "\tNew:      " << printTuple(weights) << std::endl;
-        std::cout << std::endl;
+        //std::cout << "\tNew:      " << printTuple(weights) << std::endl;
+        //std::cout << std::endl;
         
         // Apply momentum to the deltas
         unpack((std::get<Values>(deltas) *= fraction(MomentumNumerator, MomentumDenominator))...);

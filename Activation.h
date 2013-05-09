@@ -3,7 +3,7 @@
 
 struct HyperbolicTan {
     static inline double func(double input) {
-        return std::tanh(input);
+        return tanh(input);
     }
     
     static inline double dfunc(double input) {
@@ -17,7 +17,7 @@ struct Sigmoid {
     }
     
     static inline double dfunc(double input) {
-        return func(1 - func(input));
+        return func(input) * (1 - func(input));
     }
 };
 

@@ -14,7 +14,7 @@ public:
     std::tuple<decltype(Width, Neuron<Sequence<InputWidth..., BiasNeuron>, Sigmoid, std::ratio<1, 20>, std::ratio<1, 10>>())...> neurons;
     
     std::tuple<decltype(double(Width))...> operator()(const std::tuple<decltype(double(InputWidth))...>& input) {
-        return std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1)))...);
+        return std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1.0)))...);
     }
     
     template <typename TTuples, int I>
@@ -23,10 +23,10 @@ public:
     }
     
     std::tuple<decltype(double(InputWidth))...> operator()(const std::tuple<decltype(double(InputWidth))...>& input, const std::tuple<decltype(double(Width))...>& error) {
-        std::cout << "In: " << sizeof...(InputWidth) << " Out: " << sizeof...(Width) << std::endl;
-        std::cout << "Error Vector: " << printTuple(error) << std::endl;
+        //std::cout << "In: " << sizeof...(InputWidth) << " Out: " << sizeof...(Width) << std::endl;
+        //std::cout << "Error Vector: " << printTuple(error) << std::endl;
         
-        auto data = std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1)), std::get<Width>(error))...);
+        auto data = std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1.0)), std::get<Width>(error))...);
         return std::make_tuple(sumColumn<decltype(data), InputWidth>(data)...);
     }
     
