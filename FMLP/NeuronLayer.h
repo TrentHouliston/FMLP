@@ -2,6 +2,7 @@
 #define NEURALNETWORK_NEURONLAYER_H
 
 #include <tuple>
+#include <ratio>
 #include "Neuron.h"
 #include "Activation.h"
 
@@ -11,7 +12,7 @@ class NeuronLayerImpl;
 template <int... Width, int... InputWidth, int BiasNeuron>
 class NeuronLayerImpl<Sequence<Width...>, Sequence<InputWidth...>, Sequence<BiasNeuron>> {
 public:
-    std::tuple<decltype(Width, Neuron<Sequence<InputWidth..., BiasNeuron>, Sigmoid, std::ratio<1, 20>, std::ratio<1, 10>>())...> neurons;
+    std::tuple<decltype(Width, Neuron<Sequence<InputWidth..., BiasNeuron>, HyperbolicTan, std::ratio<1, 20>, std::ratio<1, 10>>())...> neurons;
     
     std::tuple<decltype(double(Width))...> operator()(const std::tuple<decltype(double(InputWidth))...>& input) {
         return std::make_tuple(std::get<Width>(neurons)(std::tuple_cat(input, std::make_tuple(1.0)))...);
