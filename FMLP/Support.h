@@ -1,8 +1,14 @@
 #ifndef FMLP_SUPPORT_H_
 #define FMLP_SUPPORT_H_
 
+#include <cmath>
+#include <random>
+
 namespace FMLP {
     
+    /**
+     * @todo Document
+     */
     struct HyperbolicTan {
         static inline double func(double input) {
             return tanh(input);
@@ -13,6 +19,9 @@ namespace FMLP {
         }
     };
     
+    /**
+     * @todo Document
+     */
     struct Sigmoid {
         static inline double func(double input) {
             return 1 / (1 + exp(-input));
@@ -23,11 +32,13 @@ namespace FMLP {
         }
     };
     
+    /**
+     * @todo Document
+     */
     struct DefaultRNG {
-        static inline double rand(...) {
+        static inline double rand() {
             std::random_device rd;
             std::uniform_real_distribution<> dist(-0.5, 0.5);
-            //std::normal_distribution<> dist(0, 0.25);
             return dist(rd);
         }
     };
