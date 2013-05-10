@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <tuple>
+#include <ratio>
 #include "Utility.h"
 
 template <typename, typename, typename, typename>
