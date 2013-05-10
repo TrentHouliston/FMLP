@@ -9,8 +9,8 @@
 template <typename, typename, typename, typename>
 class Neuron;
 
-template <int... Values, typename TActivation, int LearningNumerator, int LearningDenominator, int MomentumNumerator, int MomentumDenominator>
-class Neuron<Sequence<Values...>, TActivation, std::ratio<LearningNumerator, LearningDenominator>, std::ratio<MomentumNumerator, MomentumDenominator>> {
+template <int... Values, typename TActivation, typename LearningRate, typename Momentum>
+class Neuron<Sequence<Values...>, TActivation, LearningRate, Momentum> {
 private:
     std::tuple<decltype(double(Values))...> weights = std::make_tuple(getRand(Values)...);
     std::tuple<decltype(double(Values))...> deltas = std::make_tuple(static_cast<double>(Values - Values)...);
@@ -30,7 +30,7 @@ public:
         
         const double derivitive = TActivation::dfunc(sum((std::get<Values>(weights) * std::get<Values>(input))...));
         const auto ret = std::make_tuple((childError * std::get<Values>(weights))...);
-        const auto delta = std::make_tuple((childError * derivitive * std::get<Values>(input) * fraction(LearningNumerator, LearningDenominator))...);
+        const auto delta = std::make_tuple((childError * derivitive * std::get<Values>(input) * fraction(LearningRate::num, LearningRate::den))...);
         
         /*std::cout << "\tNeuron " << this << std::endl;
         std::cout << "\t\tChild Error:  " << printTuple(std::make_tuple(childError)) << std::endl;
@@ -57,7 +57,7 @@ public:
         //std::cout << std::endl;
         
         // Apply momentum to the deltas
-        unpack((std::get<Values>(deltas) *= fraction(MomentumNumerator, MomentumDenominator))...);
+        unpack((std::get<Values>(deltas) *= fraction(Momentum::num, Momentum::den))...);
         return true;
     }
     
