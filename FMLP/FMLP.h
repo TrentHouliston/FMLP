@@ -1,5 +1,5 @@
-#ifndef FMLP_FMLP_H
-#define FMLP_FMLP_H
+#ifndef FMLP_FMLP_H_
+#define FMLP_FMLP_H_
 
 #include <tuple>
 #include "Sequence.h"
@@ -65,14 +65,14 @@ namespace FMLP {
         struct Learn<1, Length> {
             
             template <typename... TTypes, int... I>
-            static inline std::tuple<decltype(double(I))...> error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target, Sequence<I...>) {
+            static inline std::tuple<decltype(double(I))...> error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target, Internal::Sequence<I...>) {
                 return std::make_tuple((std::get<I>(actual) - std::get<I>(target))...);
             }
             
             template <typename... TTypes>
             static inline auto error(const std::tuple<TTypes...>& actual, const std::tuple<TTypes...>& target)
-            -> decltype(error(actual, target, typename GenerateSequence<sizeof...(TTypes)>::type())) {
-                return error(actual, target, typename GenerateSequence<sizeof...(TTypes)>::type());
+            -> decltype(error(actual, target, typename Internal::GenerateSequence<sizeof...(TTypes)>::type())) {
+                return error(actual, target, typename Internal::GenerateSequence<sizeof...(TTypes)>::type());
             }
             
             template <typename... TTypes, typename... TInputs, typename... TTarget>
@@ -131,10 +131,10 @@ namespace FMLP {
          */
         template <typename...> class FMLPImpl;
         template <int... Input, int... Output, typename... LayerConfigs>
-        class FMLPImpl<Sequence<Input...>, Sequence<Output...>, LayerConfigs...> {
+        class FMLPImpl<Internal::Sequence<Input...>, Internal::Sequence<Output...>, LayerConfigs...> {
             public:
                 // This builds all of our neuron layers except our first layer (which is simply an input so does not need one)
-                std::tuple<NeuronLayer<LayerConfigs>...> layers;
+                std::tuple<Internal::NeuronLayer<LayerConfigs>...> layers;
                 
                 std::tuple<decltype(double(Output))...> classify(const std::tuple<decltype(double(Input))...>& input) {
                     return Classify<sizeof...(LayerConfigs)>::call(layers, input);
@@ -157,13 +157,13 @@ namespace FMLP {
         template <typename...> class FMLPTransform;
         template <int... PreviousInputs, int InputWidth, typename InputActivation, typename InputLearningRate, typename InputMomentumRate, typename InputRNG,
             int... Widths, typename... Activations, typename... LearningRates, typename... MomentumRates, typename... RNGs>
-        class FMLPTransform<Sequence<PreviousInputs...>, LayerConfig<InputWidth, InputActivation, InputLearningRate, InputMomentumRate, InputRNG>,
+        class FMLPTransform<Internal::Sequence<PreviousInputs...>, LayerConfig<InputWidth, InputActivation, InputLearningRate, InputMomentumRate, InputRNG>,
             LayerConfig<Widths, Activations, LearningRates, MomentumRates, RNGs>...> :
         public FMLPImpl <
             // This is our sequence for our input vector width
-            typename GenerateSequence<InputWidth>::type,
+            typename Internal::GenerateSequence<InputWidth>::type,
             // This is our sequence for our output vector's width
-            typename GenerateSequence<Last<Widths...>::value>::type,
+            typename Internal::GenerateSequence<Internal::Last<Widths...>::value>::type,
             // This is our final layer objects with their input widths integrated
             FullLayerConfig<InputWidth, InputWidth, InputActivation, InputLearningRate, InputMomentumRate, InputRNG>,
             FullLayerConfig<PreviousInputs, Widths, Activations, LearningRates, MomentumRates, RNGs>...
@@ -176,7 +176,7 @@ namespace FMLP {
      *
      * This class a public class which exposes the values that the end user can configure
      */
-    template <int Width, typename Activation, typename LearningRate = std::ratio<1, 20>, typename MomentumRate = std::ratio<1, 10>, typename RNG = DefaultRNG>
+    template <int Width, typename Activation = Sigmoid, typename LearningRate = std::ratio<1, 20>, typename MomentumRate = std::ratio<1, 10>, typename RNG = DefaultRNG>
     struct LayerConfig {
         // TODO add static assertations to make sure that LearningRatio and MomentumRatio are std::ratio objects
     };
@@ -185,7 +185,7 @@ namespace FMLP {
     template <int InputWidth, typename InputActivation, int... Widths, typename... Activations>
     class FMLPAdvanced<LayerConfig<InputWidth, InputActivation>, LayerConfig<Widths, Activations>...> :
     public FMLPTransform<
-        typename FirstN<sizeof...(Widths), InputWidth, Widths...>::type,
+        typename Internal::FirstN<sizeof...(Widths), InputWidth, Widths...>::type,
         LayerConfig<InputWidth, InputActivation>,
         LayerConfig<Widths, Activations>...
     > {};
@@ -193,7 +193,7 @@ namespace FMLP {
     
     template <int... Widths>
     class FMLP :
-    public FMLPAdvanced<LayerConfig<Widths, Sigmoid>...> {};
+    public FMLPAdvanced<LayerConfig<Widths>...> {};
     
 }
 

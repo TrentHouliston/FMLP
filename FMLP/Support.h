@@ -1,5 +1,5 @@
-#ifndef FMLP_ACTIVATION_H
-#define FMLP_ACTIVATION_H
+#ifndef FMLP_SUPPORT_H_
+#define FMLP_SUPPORT_H_
 
 namespace FMLP {
     
