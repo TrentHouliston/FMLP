@@ -1,12 +1,12 @@
 #include <iostream>
-#include "FMLP/NeuralNetwork.h"
+#include "FMLP/FMLP.h"
 
 int main(int argc, const char * argv[])
 {
 
     FMLP::FMLP<2, 3, 1> net;
     
-    for(int i = 0; i < 10000; i++) {
+    for(int i = 0; i < 1000000; i++) {
         //std::cout << "Iteration: " << i + 1 << std::endl;
         //std::cout << "Learning 0,0" << std::endl;
         net.learn(std::make_tuple(0, 0), std::make_tuple(0));

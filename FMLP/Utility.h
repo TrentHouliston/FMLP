@@ -23,14 +23,6 @@ std::string printTuple(std::tuple<TTypes...> tuple) {
     return printTuple(tuple, typename GenerateSequence<sizeof...(TTypes)>::type());
 }
 
-inline double getRand(int value) {
-    
-    std::random_device rd;
-    std::uniform_real_distribution<> dist(-0.5, 0.5);
-    //std::normal_distribution<> dist(0, 0.25);
-    return dist(rd);
-}
-
 template <typename TValue>
 inline TValue sum(TValue v) {
     return v;
