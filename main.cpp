@@ -4,11 +4,11 @@
 int main(int argc, const char * argv[])
 {
 
-    FMLP::FMLP<2, 3, 1> net;
+    //FMLP::FMLP<2, 3, 1> net;
     
-    FMLP::FMLPAdvanced<FMLP::LayerConfig<2, FMLP::Sigmoid, std::ratio<1, 20>, std::ratio<1, 10>, FMLP::DefaultRNG>, FMLP::LayerConfig<3>, FMLP::LayerConfig<1>> net2;
+    FMLP::FMLPAdvanced<FMLP::LayerConfig<2>, FMLP::LayerConfig<3, FMLP::Sin>, FMLP::LayerConfig<1, FMLP::Sin>> net;
     
-    for(int i = 0; i < 1; i++) {
+    for(int i = 0; i < 1000000; i++) {
         //std::cout << "Iteration: " << i + 1 << std::endl;
         //std::cout << "Learning 0,0" << std::endl;
         net.learn(std::make_tuple(0, 0), std::make_tuple(0));

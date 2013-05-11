@@ -10,11 +10,11 @@ namespace FMLP {
      * @todo Document
      */
     struct HyperbolicTan {
-        static inline double func(double input) {
+        static inline double func(const double input) {
             return tanh(input);
         }
         
-        static inline double dfunc(double input) {
+        static inline double dfunc(const double input) {
             return (1 - tanh(input)) * (1 + tanh(input));
         }
     };
@@ -23,12 +23,38 @@ namespace FMLP {
      * @todo Document
      */
     struct Sigmoid {
-        static inline double func(double input) {
+        static inline double func(const double input) {
             return 1 / (1 + exp(-input));
         }
         
-        static inline double dfunc(double input) {
+        static inline double dfunc(const double input) {
             return func(input) * (1 - func(input));
+        }
+    };
+    
+    /**
+     * @todo Document
+     */
+    struct Gaussian {
+        static inline double func(const double input) {
+            return exp(-pow(input, 2));
+        }
+        
+        static inline double dfunc(const double input) {
+            return -2 * func(input) * input;
+        }
+    };
+    
+    /**
+     * @todo Document
+     */
+    struct Sin {
+        static inline double func(const double input) {
+            return sin(input);
+        }
+        
+        static inline double dfunc(const double input) {
+            return cos(input);
         }
     };
     
